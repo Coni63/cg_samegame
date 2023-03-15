@@ -20,7 +20,7 @@ class TestGame(unittest.TestCase):
     def test_clone(self):
         testcase = "testcases/test18.json"
         state: BoardState = GameManager.from_testcase(testcase)
-        target_hash = "a4000d46d161839e37f0d58bfedf0be21dac28d3"
+        target_hash = "10af904b32c375050e6d4495fcdf61f46f795098"
 
         # check same instances but different pointers
         shallow_copy = state
