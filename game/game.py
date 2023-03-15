@@ -15,7 +15,7 @@ class GameManager:
         rows = data["testIn"].split("\n")
         grid = [[int(value) for value in row.strip().split(" ")] for row in rows[::-1]]  # flip as the grip has a 0 on the bottom
 
-        return BoardState(np.array(grid), score=0)
+        return BoardState(np.array(grid, dtype=np.int8), score=0)
 
     @staticmethod
     def play(state: BoardState, region: Set) -> BoardState:
@@ -43,6 +43,7 @@ class GameManager:
 
         if new_state.board[0, 0] == -1:  # grid is Y-inverted so this is bottom left
             new_state.score += 1000
+            new_state.regions = []
             return new_state
 
         new_state.compute_all_regions()
