@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Set, Tuple
 import json
 import numpy as np
 
@@ -8,14 +8,14 @@ from .board import BoardState
 class GameManager:
 
     @staticmethod
-    def from_testcase(testcase: str) -> BoardState:
+    def from_testcase(testcase: str) -> Tuple[BoardState, bool]:
         with open(testcase, "r") as f:
             data = json.load(f)
 
         rows = data["testIn"].split("\n")
         grid = [[int(value) for value in row.strip().split(" ")] for row in rows[::-1]]  # flip as the grip has a 0 on the bottom
 
-        return BoardState(np.array(grid, dtype=np.int8), score=0)
+        return BoardState(np.array(grid, dtype=np.int8), score=0), data["isValidator"] == "true"
 
     @staticmethod
     def play(state: BoardState, region: Set) -> BoardState:
@@ -67,7 +67,7 @@ class GameManager:
     def _shift_column(state: BoardState, left: int) -> None:
         offset = 0
         for i in range(left, 15):
-            if state.board[-1, i] == -1:
+            if state.board[0, i] == -1:
                 offset += 1
                 continue
 
