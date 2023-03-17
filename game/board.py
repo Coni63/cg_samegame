@@ -5,6 +5,7 @@ from queue import Queue
 from hashlib import sha1
 import numpy as np
 
+from .region import Region
 
 class BoardState:
 
@@ -39,7 +40,7 @@ class BoardState:
 
                 if len(region) > 1:
                     # print(region)
-                    self.regions.append(region)
+                    self.regions.append(Region(region, self.board[r, c]))
 
     def _compute_regions(self, pos: Tuple[int, int]) -> Set:
         color = self.board[pos[0], pos[1]]

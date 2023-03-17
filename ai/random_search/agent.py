@@ -1,6 +1,6 @@
 import random
 
-from game import GameManager, BoardState
+from game import GameManager, BoardState, Region
 
 
 class Agent:
@@ -17,8 +17,8 @@ class Agent:
             state = self.initial_state.clone()
             while True:
                 if len(state.regions) > 0:
-                    selected_region = random.choice(state.regions)
-                    row, col = random.sample(selected_region, 1)[0]
+                    selected_region: Region = random.choice(state.regions)
+                    row, col = selected_region.get_random_pos()
                     actions.append(f"{row} {col}")
                     state = GameManager.play(state, selected_region)
                 else:

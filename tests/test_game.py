@@ -6,20 +6,20 @@ from game import BoardState, GameManager
 class TestGame(unittest.TestCase):
     def test_init(self):
         testcase = "testcases/test18.json"
-        state: BoardState = GameManager.from_testcase(testcase)
+        state, _ = GameManager.from_testcase(testcase)
 
         self.assertTupleEqual(state.board.shape, (15, 15))
         self.assertEqual(state.score, 0)
 
     def test_counter(self):
         testcase = "testcases/test18.json"
-        state: BoardState = GameManager.from_testcase(testcase)
+        state, _ = GameManager.from_testcase(testcase)
 
         self.assertTupleEqual(tuple(state.counter), (39, 55, 41, 56, 34))
 
     def test_clone(self):
         testcase = "testcases/test18.json"
-        state: BoardState = GameManager.from_testcase(testcase)
+        state, _ = GameManager.from_testcase(testcase)
         target_hash = "10af904b32c375050e6d4495fcdf61f46f795098"
 
         # check same instances but different pointers
@@ -37,7 +37,7 @@ class TestGame(unittest.TestCase):
 
     def test_regions(self):
         testcase = "testcases/test20.json"
-        state: BoardState = GameManager.from_testcase(testcase)
+        state, _ = GameManager.from_testcase(testcase)
         state.compute_all_regions()
 
         total_group = sum(len(x) for x in state.regions)
@@ -48,7 +48,7 @@ class TestGame(unittest.TestCase):
 
     def test_gravity(self):
         testcase = "testcases/test1.json"
-        state: BoardState = GameManager.from_testcase(testcase)
+        state, _ = GameManager.from_testcase(testcase)
         state.compute_all_regions()
 
         self.assertEqual(len(state.regions), 12)
@@ -66,7 +66,7 @@ class TestGame(unittest.TestCase):
 
     def test_shift_columns(self):
         testcase = "testcases/test2.json"
-        state: BoardState = GameManager.from_testcase(testcase)
+        state, _ = GameManager.from_testcase(testcase)
         state.compute_all_regions()
 
         self.assertEqual(len(state.regions), 10)
