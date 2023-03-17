@@ -1,6 +1,6 @@
 import unittest
 
-from game import BoardState, GameManager
+from game import GameManager
 
 
 class TestGame(unittest.TestCase):

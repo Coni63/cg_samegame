@@ -7,6 +7,7 @@ import numpy as np
 
 from .region import Region
 
+
 class BoardState:
 
     def __init__(self, values: list[list[int]], score=0, regions=None):
