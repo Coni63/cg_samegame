@@ -9,16 +9,14 @@ Due to high branching factor
 class Agent:
     def __init__(self, initial_state: BoardState):
         self.initial_state = initial_state
-        self.initial_state.compute_all_regions()
-        self.Q = [([], self.initial_state)]
 
     def run(self):
+        Q = [([], self.initial_state)]
         visited = set()
         best_actions = None
         best_score = 0
-        while len(self.Q) > 0:
-            actions, state = self.Q.pop(0)
-            print("depth:", len(actions))
+        while len(Q) > 0:
+            actions, state = Q.pop(0)
             for region in state.regions:
                 row, col = region.get_random_pos()
                 new_actions = actions[:] + [f"{row} {col}"]
@@ -31,7 +29,7 @@ class Agent:
                 visited.add(new_state)
 
                 if len(new_state.regions) > 0:
-                    self.Q.append((new_actions, new_state))
+                    Q.append((new_actions, new_state))
                 elif new_state.score > best_score:
                     best_score = new_state.score
                     best_actions = new_actions
