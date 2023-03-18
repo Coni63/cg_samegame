@@ -15,7 +15,9 @@ class GameManager:
         rows = data["testIn"].split("\n")
         grid = [[int(value) for value in row.strip().split(" ")] for row in rows[::-1]]  # flip as the grip has a 0 on the bottom
 
-        return BoardState(np.array(grid, dtype=np.int8), score=0), data["isValidator"] == "true"
+        bs = BoardState(np.array(grid, dtype=np.int8), score=0)
+        bs.compute_all_regions()
+        return bs, data["isValidator"] == "true"
 
     @staticmethod
     def play(state: BoardState, region: Set) -> BoardState:
