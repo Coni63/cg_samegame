@@ -20,14 +20,15 @@ class BoardState:
     def clone(self) -> BoardState:
         return BoardState(np.copy(self.board), self.score, self.regions)
 
-    def __eq__(self, other):
+    def __eq__(self, other: any) -> bool:
         if not isinstance(other, BoardState):
             return False
 
         return hash(self) == hash(other)
 
-    def __hash__(self):
-        return int(sha1(self.board).hexdigest() + str(self.score), 16)
+    def __hash__(self) -> int:
+        s = sha1(self.board).hexdigest() + str(self.score)
+        return hash(int(s, 16))  # hash lead to a shorter int
 
     def compute_all_regions(self):
         all_visited = set()
