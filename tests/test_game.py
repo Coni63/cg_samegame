@@ -20,7 +20,7 @@ class TestGame(unittest.TestCase):
     def test_clone(self):
         testcase = "testcases/test18.json"
         state, _ = GameManager.from_testcase(testcase)
-        target_hash = "10af904b32c375050e6d4495fcdf61f46f795098"
+        target_hash = 1130581700040491337
 
         # check same instances but different pointers
         shallow_copy = state
@@ -32,8 +32,8 @@ class TestGame(unittest.TestCase):
         self.assertNotEqual(id(deep_clone), id(state))
         self.assertNotEqual(id(deep_clone.board), id(state.board))
 
-        self.assertEqual(deep_clone.get_hash(), state.get_hash())
-        self.assertEqual(deep_clone.get_hash(), target_hash)
+        self.assertEqual(hash(deep_clone), hash(state))
+        self.assertEqual(hash(deep_clone), target_hash)
 
     def test_regions(self):
         testcase = "testcases/test20.json"

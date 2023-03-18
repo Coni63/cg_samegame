@@ -27,7 +27,7 @@ class BoardState:
         return hash(self) == hash(other)
 
     def __hash__(self):
-        return hash(sha1(self.board).hexdigest() + str(self.score))
+        return int(sha1(self.board).hexdigest() + str(self.score), 16)
 
     def compute_all_regions(self):
         all_visited = set()
