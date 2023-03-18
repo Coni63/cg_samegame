@@ -2,7 +2,9 @@ import glob
 import json
 # from ai.random_search import Agent
 # from ai.BFS import Agent
-from ai.MCTS import Agent
+# from ai.MCTS import Agent
+# from ai.tabuBFS import Agent
+from ai.tabu_random_search import Agent
 from ai.utils import Saver
 from game import GameManager
 
@@ -15,8 +17,9 @@ def train(files: list[str]):
         print(file)
         initial_state, is_validator = GameManager.from_testcase(file)
         agent = Agent(initial_state)
+        best_score, best_action = agent.run(15000)  # for the random search
         # best_score, best_action = agent.run()  # for the BFS
-        best_score, best_action = agent.run(n_iter=2000, n_rollout=10)
+        # best_score, best_action = agent.run(n_iter=2000, n_rollout=10)
         action_str = ";".join(best_action)
         total_score += best_score
 
