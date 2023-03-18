@@ -24,7 +24,7 @@ class Agent:
                 else:
                     if state.score > best_score:
                         best_score = state.score
-                        best_actions = ";".join(actions)
+                        best_actions = actions
                     break
 
         return (best_score, best_actions)
