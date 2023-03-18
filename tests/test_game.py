@@ -1,4 +1,5 @@
 import unittest
+import glob
 
 from game import GameManager
 
@@ -82,3 +83,21 @@ class TestGame(unittest.TestCase):
         first_row = list(new_state.board[0].flatten())
         target_row = [1, 2, 2, 0, 0, 1, 1, 4, 4, 1, 1, 2, 0, -1, -1]
         self.assertListEqual(first_row, target_row)
+
+    def test_collisions(self):
+        all_hashs = {}
+        collision = False
+        files = glob.glob("testcases/test*.json")
+        for file in files:
+            initial_state, is_validator = GameManager.from_testcase(file)
+            code = hash(initial_state)
+            print(file, code)
+            if code not in all_hashs:
+                all_hashs[code] = file
+            else:
+                print(f"{file} collides with {all_hashs[code]} : {code}")
+                collision = True
+                # break
+
+        self.assertFalse(collision, msg="The hash function does not provide a unique hash for every tests cases")
+
