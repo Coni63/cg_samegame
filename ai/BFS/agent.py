@@ -13,6 +13,7 @@ class Agent:
         self.Q = [([], self.initial_state)]
 
     def run(self):
+        visited = set()
         best_actions = None
         best_score = 0
         while len(self.Q) > 0:
@@ -22,6 +23,12 @@ class Agent:
                 row, col = region.get_random_pos()
                 new_actions = actions[:] + [f"{row} {col}"]
                 new_state = GameManager.play(state, region)
+
+                if new_state in visited:
+                    # print("skipped")
+                    continue
+
+                visited.add(new_state)
 
                 if len(new_state.regions) > 0:
                     self.Q.append((new_actions, new_state))
