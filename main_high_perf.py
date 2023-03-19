@@ -20,17 +20,18 @@ class Board:
     def clone(self):
         return Board(np.array(self.board), self.score)
 
-    def get_random_region(self, tabuColor=None) -> Set[Tuple[int, int]]:            
-        all_tabu = np.argwhere(self.board == tabuColor).tolist()
-        all_non_tabu = np.argwhere((self.board > -1) & (self.board != tabuColor)).tolist()
+    def get_random_region(self, tabuColor=None) -> Set[Tuple[int, int]]:
+        offset = np.array([16, 1])
+        all_tabu = (np.argwhere(self.board == tabuColor) @ offset).tolist()
+        all_non_tabu = (np.argwhere((self.board > -1) & (self.board != tabuColor)) @ offset).tolist()
 
-        np.random.shuffle(all_non_tabu)
+        random.shuffle(all_non_tabu)
         for pos in all_non_tabu:
             region = self._compute_regions(pos)
             if len(region) > 1:
                 return region
 
-        np.random.shuffle(all_tabu)
+        random.shuffle(all_tabu)
         for pos in all_tabu:
             region = self._compute_regions(pos)
             if len(region) > 1:
@@ -38,13 +39,14 @@ class Board:
 
         return None
 
-    def play(self, region: Set[Tuple[int, int]]) -> bool:
+    def play(self, region: Set[int]) -> bool:
         left = 14
         right = 0
         top = 14
 
-        for r, c in region:
-            self.board[r][c] = -1
+        for pos in region:
+            r, c = pos >> 4, pos & 15
+            self.board[r, c] = -1
             # get the bounding box to update only this part
             left = min(left, c)
             right = max(right, c)
@@ -87,32 +89,34 @@ class Board:
             self.board[:, i-offset] = self.board[:, i]
             self.board[:, i] = -1
 
-    def _compute_regions(self, pos: Tuple[int, int]) -> Set[Tuple[int, int]]:
-        color = self.board[pos[0], pos[1]]
+    def _compute_regions(self, xxyy: int) -> Set[int]:
+        r, c = xxyy >> 4, xxyy & 15
+        color = self.board[r, c]
         region = set()
         Q = Queue()
 
-        Q.put(pos)
+        Q.put(xxyy)
 
         while not Q.empty():
-            r, c = Q.get()
-
+            xxyy = Q.get()
+            r, c = xxyy >> 4, xxyy & 15
             if self.board[r, c] != color:
                 continue
 
-            if (r, c) in region:
+            if xxyy in region:
                 continue
 
-            region.add((r, c))
+            region.add(xxyy)
 
+            r << 4 | c
             if c > 0:
-                Q.put((r, c-1))
+                Q.put(r << 4 | (c-1))
             if c < 14:
-                Q.put((r, c+1))
+                Q.put(r << 4 | (c+1))
             if r > 0:
-                Q.put((r-1, c))
+                Q.put((r-1) << 4 | c)
             if r < 14:
-                Q.put((r+1, c))
+                Q.put((r+1) << 4 | c)
         return region
 
 
@@ -131,12 +135,13 @@ class Agent:
 
             actions = []
             while True:
-                selected_region: Set[Tuple[int, int]] = self.running_state.get_random_region(tabu)
+                selected_region: Set[int] = self.running_state.get_random_region(tabu)
                 if selected_region is None:  # no more group
                     break
 
                 done = self.running_state.play(selected_region)
-                row, col = selected_region.pop()
+                pos = selected_region.pop()
+                row, col = pos >> 4, pos & 15
                 actions.append(f"{row} {col}")
                 if done:
                     break
