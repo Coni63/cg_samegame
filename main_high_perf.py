@@ -4,26 +4,7 @@ from queue import Queue
 import random
 import json
 import numpy as np
-import random
 import tqdm
-
-from game import GameManager, BoardState, Region
-
-
-class Region:
-    def __init__(self, pos, color):
-        self.pos: Set[Tuple[int, int]] = pos
-        self.color = color
-
-    def get_random_pos(self) -> Tuple[int, int]:
-        return random.sample(self.pos, 1)[0]
-
-    def __iter__(self) -> Tuple[int, int]:
-        for row, col in self.pos:
-            yield row, col
-
-    def __len__(self) -> int:
-        return len(self.pos)
 
 
 class Board:
@@ -39,23 +20,17 @@ class Board:
     def clone(self):
         return Board(np.array(self.board), self.score)
 
-    def get_random_region(self, tabuColor=None) -> Region:
-        all_tabu = []
-        all_non_tabu = []
+    def get_random_region(self, tabuColor=None) -> Set[Tuple[int, int]]:            
+        all_tabu = np.argwhere(self.board == tabuColor).tolist()
+        all_non_tabu = np.argwhere((self.board > -1) & (self.board != tabuColor)).tolist()
 
-        for color in range(5):
-            if color == tabuColor:
-                all_tabu += np.argwhere(self.board == color).tolist()
-            else:
-                all_non_tabu += np.argwhere(self.board == color).tolist()
-
-        random.shuffle(all_non_tabu)
+        np.random.shuffle(all_non_tabu)
         for pos in all_non_tabu:
             region = self._compute_regions(pos)
             if len(region) > 1:
                 return region
 
-        random.shuffle(all_tabu)
+        np.random.shuffle(all_tabu)
         for pos in all_tabu:
             region = self._compute_regions(pos)
             if len(region) > 1:
@@ -63,7 +38,7 @@ class Board:
 
         return None
 
-    def play(self, region: Region) -> bool:
+    def play(self, region: Set[Tuple[int, int]]) -> bool:
         left = 14
         right = 0
         top = 14
@@ -112,7 +87,7 @@ class Board:
             self.board[:, i-offset] = self.board[:, i]
             self.board[:, i] = -1
 
-    def _compute_regions(self, pos: Tuple[int, int]) -> Region:
+    def _compute_regions(self, pos: Tuple[int, int]) -> Set[Tuple[int, int]]:
         color = self.board[pos[0], pos[1]]
         region = set()
         Q = Queue()
@@ -138,11 +113,11 @@ class Board:
                 Q.put((r-1, c))
             if r < 14:
                 Q.put((r+1, c))
-        return Region(region, color)
+        return region
 
 
 class Agent:
-    def __init__(self, initial_state: BoardState):
+    def __init__(self, initial_state: Board):
         self.initial_state = initial_state
         self.running_state = initial_state.clone()
 
@@ -156,19 +131,18 @@ class Agent:
 
             actions = []
             while True:
-                selected_region: Region = self.running_state.get_random_region(tabu)
-                # print(selected_region.pos)
+                selected_region: Set[Tuple[int, int]] = self.running_state.get_random_region(tabu)
                 if selected_region is None:  # no more group
                     break
 
-                row, col = selected_region.get_random_pos()
-                actions.append(f"{row} {col}")
                 done = self.running_state.play(selected_region)
-                # print(self.running_state.board)
+                row, col = selected_region.pop()
+                actions.append(f"{row} {col}")
                 if done:
                     break
 
             if self.running_state.score > best_score:
+                # print("New best score", self.running_state.score)
                 best_score = self.running_state.score
                 best_actions = actions
 
