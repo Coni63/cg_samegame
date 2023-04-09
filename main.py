@@ -67,19 +67,33 @@ def remove_duplicates():
     hash_to_hash = {}
     titles = {}
 
+    # dans un 1er temps on skip les recolored 
     for file in glob.glob("testcases/test*.json"):
-        initial_state, is_validator = GameManager.from_testcase(file)
-        code = str(hash(initial_state))
-
         with open(file, "r") as f:
             data = json.load(f)
 
-        name = data["title"]["2"].replace(" (recolored)", "")
+        if data["title"]["2"].endswith("(recolored)"):
+            continue
 
-        if name in titles:
-            hash_to_hash[code] = file_to_hash[titles[name]]
-        else:
-            hash_to_hash[code] = code
+        initial_state, is_validator = GameManager.from_testcase(file)
+        code = str(hash(initial_state))
+
+        name = data["title"]["2"]
+        file_to_hash[name] = code
+        hash_to_hash[code] = code
+
+    for file in glob.glob("testcases/test*.json"):
+        with open(file, "r") as f:
+            data = json.load(f)
+
+        if not data["title"]["2"].endswith("(recolored)"):
+            continue
+        
+        initial_state, is_validator = GameManager.from_testcase(file)
+        code = str(hash(initial_state))
+        
+        name = data["title"]["2"].replace(" (recolored)", "")
+        hash_to_hash[code] = file_to_hash[name]
 
     return hash_to_hash
 
@@ -132,6 +146,7 @@ if __name__ == "__main__":
         # 'testcases\\test9.json'
     ]
 
-    train(files)
+    # train(files)
     # eval(files, only_validator=False)
     # make_dictionary(files)
+    print(remove_duplicates())

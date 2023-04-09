@@ -5,7 +5,7 @@ import random
 import json
 import numpy as np
 import tqdm
-
+from ai.utils.saver import Saver
 
 class Board:
 
@@ -20,18 +20,17 @@ class Board:
     def clone(self):
         return Board(np.array(self.board), self.score)
 
-    def get_random_region(self, tabuColor=None) -> Set[Tuple[int, int]]:
-        offset = np.array([16, 1])
-        all_tabu = (np.argwhere(self.board == tabuColor) @ offset).tolist()
-        all_non_tabu = (np.argwhere((self.board > -1) & (self.board != tabuColor)) @ offset).tolist()
+    def get_random_region(self, tabuColor=None) -> Set[Tuple[int, int]]:        
+        all_tabu = np.argwhere(self.board == tabuColor).tolist()
+        all_non_tabu = np.argwhere((self.board > -1) & (self.board != tabuColor)).tolist()
 
-        random.shuffle(all_non_tabu)
+        np.random.shuffle(all_non_tabu)
         for pos in all_non_tabu:
             region = self._compute_regions(pos)
             if len(region) > 1:
                 return region
 
-        random.shuffle(all_tabu)
+        np.random.shuffle(all_tabu)
         for pos in all_tabu:
             region = self._compute_regions(pos)
             if len(region) > 1:
@@ -89,9 +88,9 @@ class Board:
             self.board[:, i-offset] = self.board[:, i]
             self.board[:, i] = -1
 
-    def _compute_regions(self, xxyy: int) -> Set[int]:
-        r, c = xxyy >> 4, xxyy & 15
-        color = self.board[r, c]
+    def _compute_regions(self, pos: list[int, int]) -> Set[int]:
+        xxyy = pos[0] << 4 | pos[1]
+        color = self.board[pos[0], pos[1]]
         region = set()
         Q = Queue()
 
@@ -165,9 +164,36 @@ def load(testcase: str) -> np.array:
 
 
 if __name__ == "__main__":
-    file = 'testcases\\test10.json'
-    arr = load(file)
-    board = Board(arr)
-    agent = Agent(board)
-    best_score, best_actions = agent.run(15000)
-    print(best_score, best_actions)
+    files = [
+        'testcases\\test6.json',
+        'testcases\\test7.json',
+        'testcases\\test8.json',
+        'testcases\\test9.json',
+        # 'testcases\\test10.json',
+        'testcases\\test12.json',
+        'testcases\\test13.json',
+        'testcases\\test14.json',
+        'testcases\\test16.json',
+        'testcases\\test17.json',
+        'testcases\\test18.json',
+        'testcases\\test19.json',
+        'testcases\\test21.json',
+        'testcases\\test22.json',
+        'testcases\\test23.json',
+        'testcases\\test24.json',
+        'testcases\\test26.json',
+        'testcases\\test27.json',
+        'testcases\\test28.json',
+        'testcases\\test29.json',
+    ]
+
+    run_id = random.randint(0, 10000)
+    saver = Saver(f"output_{run_id}.db")
+    while True:
+        file = random.choice(files)  #files[0] #'testcases\\test10.json'
+        arr = load(file)
+        board = Board(arr)
+        agent = Agent(board)
+        best_score, best_actions = agent.run(15000)
+        saver.save(file, best_actions, best_score)
+        print(file, best_score, best_actions)
